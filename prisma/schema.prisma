@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model FUser {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  posts Post[]
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  viewCount Int      @default(0)
+  author    FUser?   @relation(fields: [authorId], references: [id])
+  authorId  Int?
+}
+
+model Customer {
+
+  id            Int            @id @default(autoincrement())
+  name          String
+  organizations Organization[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+
+
+}
+
+model User {
+  id                 Int            @id @default(autoincrement())
+  name               String
+  phone_number       String         @unique
+  password           String?
+  organizations      Organization[]
+  events             Event[]
+  activeOrganization Int?
+  createdAt          DateTime       @default(now())
+  otp                Int?
+  otp_exp_date       DateTime?
+
+}
+
+model Gallery {
+  id             Int          @id @default(autoincrement())
+  active         Boolean      @default(true)
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
+  beafs          Beaf[]
+}
+
+model Story {
+  id                Int    @id @default(autoincrement())
+  story_description String
+  beaf              Beaf   @relation(fields: [beafId], references: [id])
+  beafId            Int
+}
+
+model Beaf {
+  id          Int      @id @default(autoincrement())
+  description String?
+  isCompleted Boolean  @default(false)
+  gallery     Gallery? @relation(fields: [galleryId], references: [id])
+  galleryId   Int?
+  stories     Story[]
+  images      Image[]
+  event       Event?   @relation(fields: [eventId], references: [id])
+  eventId     Int?
+  Feature     Feature? @relation(fields: [featureId], references: [id])
+  featureId   Int?
+  options     Option[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+}
+
+model Image {
+  id         Int    @id @default(autoincrement())
+  spotInLine Int
+  location   String
+  beafs      Beaf[]
+  event      Event? @relation(fields: [eventId], references: [id])
+  eventId    Int?
+
+}
+
+model Event {
+  id             Int           @id @default(autoincrement())
+  first_name     String
+  last_name      String
+  zip_code       Int
+  city           String
+  status         String
+  //status         ProjectStatus @default(DRAFT) implement later when done with sqlite
+  phone_number   String
+  user           User?         @relation(fields: [userId], references: [id])
+  userId         Int?
+  beafs          Beaf[]
+  images         Image[]
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId Int? //organizationId: organization(orgUser).id
+  category       Category?     @relation(fields: [categoryId], references: [id])
+  categoryId     Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+model Organization {
+  id         Int       @id @default(autoincrement())
+  name       String
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId Int?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  users      User[]
+  galleries  Gallery[]
+  events     Event[]
+}
+
+model Category {
+  id            Int       @id @default(autoincrement())
+  category_name String    @unique
+  active        Boolean   @default(true)
+  description   String?
+  image         String?
+  features      Feature[]
+  events        Event[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Feature {
+  id            Int        @id @default(autoincrement())
+  feature_name  String
+  active        Boolean    @default(true)
+  parent_cat_id Int
+  categories    Category[]
+  options       Option[]
+  beafs         Beaf[]
+
+  @@unique([parent_cat_id, feature_name])
+}
+
+model Option {
+  id             Int       @id @default(autoincrement())
+  option_name    String
+  active         Boolean   @default(true)
+  parent_feat_id Int
+  features       Feature[]
+  beafs          Beaf[]
+
+  @@unique([parent_feat_id, option_name])
+}
+
+// enum ProjectStatus {
+//   DRAFT
+//   COMPLETED
+//   CANCELLED
+// }

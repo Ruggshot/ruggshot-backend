@@ -1,0 +1,281 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type FUser {
+  id: Int!
+  email: String!
+  name: String
+  posts: [Post!]
+}
+
+type Post {
+  id: Int!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  title: String!
+  content: String
+  published: Boolean
+  viewCount: Int!
+  author: FUser
+}
+
+"""
+`Date` type as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
+"""
+scalar Timestamp
+
+type Customer {
+  id: Int!
+  name: String!
+  organizations: [Organization!]
+}
+
+type Category {
+  id: Int!
+  category_name: String!
+  description: String
+  image: String
+  active: Boolean!
+  features: [Feature!]
+  events: [Event!]
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+
+type Option {
+  id: Int!
+  option_name: String!
+  active: Boolean!
+  parent_feat_id: Int!
+  features: [Feature!]!
+}
+
+type Feature {
+  id: Int!
+  feature_name: String!
+  active: Boolean!
+  parent_cat_id: Int!
+  categories: [Category!]!
+  options: [Option!]
+}
+
+type Gallery {
+  id: Int!
+  active: Boolean!
+  organization: Organization!
+  beafs: [Beaf!]!
+}
+
+type Image {
+  id: Int!
+  spotInLine: Int
+  location: String
+  link: String!
+  beafs: [Beaf!]!
+  event: Event!
+}
+
+type Story {
+  id: Int!
+  beaf: Beaf!
+  story_description: String!
+}
+
+type Beaf {
+  id: Int!
+  description: String
+  isCompleted: Boolean!
+  gallery: Gallery
+  stories: [Story!]
+  images: [Image!]
+  event: Event
+  eventId: Float
+  feature: Feature
+  options: [Option!]
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+
+type User {
+  id: Int!
+  name: String!
+  phone_number: String!
+  password: String
+  organizations: [Organization!]!
+  events: [Event!]
+  activeOrganization: Int
+  createdAt: Timestamp!
+}
+
+type Event {
+  id: Int!
+  first_name: String!
+  last_name: String!
+  zip_code: Int!
+  city: String!
+  phone_number: String!
+  status: String!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  beafs: [Beaf!]!
+  images: [Image!]!
+  user: User!
+  userId: Int!
+  organization: Organization!
+  organizationId: Int!
+  category: Category!
+  categoryId: Int!
+}
+
+type Organization {
+  id: Int!
+  name: String!
+  customer: Customer!
+  users: [User!]!
+  galleries: [Gallery!]!
+  events: [Event!]!
+}
+
+type LoginResponse {
+  access_token: String!
+  user: User!
+}
+
+type Query {
+  allFUsers: [FUser!]
+  draftsByFUser(fuserUniqueInput: FUserUniqueInput!): [Post!]
+  postById(id: Float!): Post
+  feed(searchString: String, skip: Float, take: Float, orderBy: PostOrderByUpdatedAtInput): [Post!]!
+  allEvents(orderBy: String, skip: Float, take: Float, status: String, zipCode: String, firstName: String, lastName: String, categoryId: Float): [Event!]!
+  findEventById(eventId: Float!): Event!
+  allOrganizations: [Organization!]!
+  organization(id: Int!): Organization!
+  allCustomers: [Customer!]!
+  allUsers: [User!]!
+  findUserById: User!
+  findUserByNumber: User!
+  allGalleries: [Gallery!]!
+  allBeafs: [Beaf!]!
+  findBeafById(beafId: Float!): Beaf!
+  getEventBeafs(eventId: Float!): [Beaf!]!
+  allStories: [Story!]!
+  allImages: [Image!]!
+  findCategoryById(id: Int!): Category!
+  allCategories: [Category!]!
+  allAssignedCategories: [Category!]!
+  findOptionByID(id: Int!): Option!
+  allOptions: [Option!]!
+  allOptionsWhereParent(id: Int!): [Option!]!
+  verifyUserExists(phone_number: String!): User!
+  verifyOTP(otp: Float!, userId: Float!): Boolean!
+  isAuthorized: Boolean!
+  findFeatureById(id: Int!): Feature!
+  allFeatures: [Feature!]!
+}
+
+input FUserUniqueInput {
+  id: Float
+  email: String
+}
+
+input PostOrderByUpdatedAtInput {
+  updatedAt: SortOrder!
+}
+
+enum SortOrder {
+  asc
+  desc
+}
+
+type Mutation {
+  signupFUser(data: FUserCreateInput!): FUser!
+  createDraft(data: PostCreateInput!, authorEmail: String!): Post!
+  incrementPostViewCount(id: Float!): Post!
+  togglePublishPost(id: Float!): Post
+  deletePost(id: Float!): Post
+  createEvent(data: CreateEventInput!): Event!
+  updateEvent(eventId: Float!, eventStatus: String, firstName: String, lastName: String, zipCode: String, phoneNumber: String, categoryId: Float): Event!
+  createOrganization(data: CreateOrganizationInput!, customerId: Float!, users: Float!): Organization!
+  createCustomer(data: CreateCustomerInput!): Customer!
+  updateUser(userId: Float!, updateUserInput: UpdateUserInput!): User!
+  createGallery(organizationId: Float!): Gallery!
+  createBeaf(eventId: Float!): Beaf!
+  createStory(data: CreateStoryInput!, beafId: Float!): Story!
+  singleUpload(file: Upload!, eventId: Int!, beafIndex: Int!, spotInLine: Int!): Boolean!
+  createCategory(data: CreateCategoryInput!): Category!
+  createOption(data: CreateOptionInput!): Option!
+  loginUser(loginUserInput: LoginUserInput!): LoginResponse!
+  signup(createUserInput: CreateUserInput!, organizationId: Float!, anotherOrgId: Float!): User!
+  createFeature(data: CreateFeatureInput!): Feature!
+}
+
+input FUserCreateInput {
+  email: String!
+  name: String
+  posts: [PostCreateInput!]
+}
+
+input PostCreateInput {
+  title: String!
+  content: String
+}
+
+input CreateEventInput {
+  first_name: String!
+  last_name: String!
+  zip_code: Int!
+  city: String!
+  phone_number: String!
+  categoryId: Int!
+}
+
+input CreateOrganizationInput {
+  name: String!
+}
+
+input CreateCustomerInput {
+  name: String!
+}
+
+input UpdateUserInput {
+  name: String
+  phone_number: String
+  password: String!
+  activeOrganization: Int
+}
+
+input CreateStoryInput {
+  story_description: String!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+input CreateCategoryInput {
+  category_name: String!
+  description: String
+  image: String
+}
+
+input CreateOptionInput {
+  option_name: String!
+  parent_feat_id: Int!
+}
+
+input LoginUserInput {
+  phone_number: String!
+  password: String!
+}
+
+input CreateUserInput {
+  name: String!
+  phone_number: String!
+  password: String
+  activeOrganization: Int
+}
+
+input CreateFeatureInput {
+  feature_name: String!
+  parent_cat_id: Int!
+}

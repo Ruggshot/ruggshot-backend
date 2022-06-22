@@ -1,0 +1,6 @@
+-- CreateTable
+CREATE TABLE "Beaf" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "galleryId" INTEGER NOT NULL,
+    CONSTRAINT "Beaf_galleryId_fkey" FOREIGN KEY ("galleryId") REFERENCES "Gallery" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
