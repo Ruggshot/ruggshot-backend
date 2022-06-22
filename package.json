@@ -46,6 +46,7 @@
     "@nestjs/core": "8.4.4",
     "@nestjs/graphql": "10.0.9",
     "@nestjs/jwt": "^8.0.0",
+    "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^8.2.1",
     "@nestjs/platform-express": "8.4.4",
     "@prisma/client": "3.12.0",
