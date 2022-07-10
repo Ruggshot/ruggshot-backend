@@ -121,7 +121,7 @@ type Event {
   beafs: [Beaf!]!
   images: [Image!]!
   user: User!
-  userId: Int!
+  userId: Int
   organization: Organization!
   organizationId: Int!
   category: Category!
