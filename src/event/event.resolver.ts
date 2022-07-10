@@ -108,7 +108,7 @@ export class EventResolver {
     } else {
       intZip = null;
     }
-    const bla = await this.prismaService.event.findMany({
+    const events = await this.prismaService.event.findMany({
       orderBy: {
         first_name: SortOrder.asc,
       },
@@ -120,8 +120,8 @@ export class EventResolver {
         id: category || undefined,
       },
     });
-    console.log(bla);
-    return bla;
+    console.log('event queried');
+    return events;
   }
 
   @Query(() => Event, { name: 'findEventById' })
@@ -184,24 +184,24 @@ export class EventResolver {
           },
         },
       });
-      try {
-        await this.prismaService.beaf.create({
-          data: {
-            event: {
-              connect: {
-                id: newEvent.id,
-              },
-            },
-            gallery: {
-              connect: {
-                id: activeOrg.galleries[0].id,
-              },
-            },
-          },
-        });
-      } catch (error) {
-        console.log(error);
-      }
+      // try {
+      //   await this.prismaService.beaf.create({
+      //     data: {
+      //       event: {
+      //         connect: {
+      //           id: newEvent.id,
+      //         },
+      //       },
+      //       gallery: {
+      //         connect: {
+      //           id: activeOrg.galleries[0].id,
+      //         },
+      //       },
+      //     },
+      //   });
+      // } catch (error) {
+      //   console.log(error);
+      // }
       return newEvent;
     } catch (error) {
       console.log(error);
