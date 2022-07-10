@@ -100,7 +100,7 @@ export class EventResolver {
     @Args('firstName', { nullable: true }) first_name: string,
     @Args('lastName', { nullable: true }) last_name: string,
     @Args('categoryId', { nullable: true }) category: number,
-
+    @CurrentUser() user: User,
     @Context() ctx,
   ) {
     if (!isNaN(Number(zip_code))) {
@@ -108,6 +108,14 @@ export class EventResolver {
     } else {
       intZip = null;
     }
+    const activeUser = await this.prismaService.user.findUnique({
+      where: {
+        id: user.id,
+      },
+      include: {
+        organizations: true,
+      },
+    });
     const events = await this.prismaService.event.findMany({
       orderBy: {
         first_name: SortOrder.asc,
@@ -118,9 +126,10 @@ export class EventResolver {
         first_name: first_name || undefined,
         last_name: last_name || undefined,
         id: category || undefined,
+        organizationId: activeUser.activeOrganization,
       },
     });
-    console.log('event queried');
+
     return events;
   }
 

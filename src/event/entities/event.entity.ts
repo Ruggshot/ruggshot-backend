@@ -44,7 +44,7 @@ export class Event {
   @Field(() => User)
   user?: User;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   userId?: number;
 
   @Field(() => Organization)
