@@ -20,8 +20,8 @@ import { TwilioModule } from 'nestjs-twilio';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FeatureModule } from './CATEGORIES/feature/feature.module';
 import { EventResolver } from './event/event.resolver';
-import { GraphQLUpload } from 'graphql-upload';
 import { S3Service } from './s3/s3.service';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -58,6 +58,7 @@ import { S3Service } from './s3/s3.service';
     EventModule,
     AuthModule,
     FeatureModule,
+    UploadModule,
   ],
   controllers: [],
   providers: [
