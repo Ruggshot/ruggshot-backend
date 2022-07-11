@@ -46,7 +46,8 @@ model User {
   organizations      Organization[]
   events             Event[]
   activeOrganization Int?
-  // orgVerified        Boolean        @default(false)
+  orgVerified        Boolean        @default(false)
+  numberVerified     Boolean        @default(false)
   createdAt          DateTime       @default(now())
   otp                Int?
   otp_exp_date       DateTime?

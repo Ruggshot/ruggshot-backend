@@ -17,6 +17,12 @@ export class User {
   @Field(() => String, { nullable: true })
   password: string;
 
+  @Field(() => Boolean)
+  orgVerified: Boolean;
+
+  @Field(() => Boolean)
+  numberVerified: Boolean;
+
   @Field(() => [Organization])
   organizations: [Organization];
 

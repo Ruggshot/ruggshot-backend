@@ -12,6 +12,7 @@ import { LoginUserInput } from './dto/login-user.input';
 import { UserNumber } from './entities/user-number.entity';
 import { GqlAuthGuard } from './gql-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { ApolloError } from 'apollo-server-express';
 
 @Resolver()
 export class AuthResolver {
@@ -22,7 +23,7 @@ export class AuthResolver {
 
   @Mutation(() => LoginResponse, { name: 'loginUser' })
   @UseGuards(GqlAuthGuard)
-  login(
+  async login(
     @Args('loginUserInput') loginUserInput: LoginUserInput,
     @Context() context,
   ) {
@@ -39,6 +40,7 @@ export class AuthResolver {
     return this.userService.createUser(data, organizationId, ctx, anotherId);
   }
 
+  // Sends OTP for number verification if User exists
   @Query(() => User)
   async verifyUserExists(
     @Args('phone_number', { type: () => String }) phone_number: string,
@@ -52,6 +54,21 @@ export class AuthResolver {
     @Args('userId') userId: number,
   ): Promise<Boolean> {
     return this.authService.verifyOtp(otp, userId);
+  }
+
+  @Query(() => Boolean)
+  async sendOrgOTP(
+    @Args('phone_number', { type: () => String }) phone_number: string,
+  ): Promise<Boolean> {
+    return this.authService.sendOrgOTP(phone_number);
+  }
+
+  @Query(() => Boolean)
+  async verifyOrgOTP(
+    @Args('otp') otp: number,
+    @Args('phoneNumber') phone_number: string,
+  ): Promise<Boolean> {
+    return this.authService.verifyOrgOTP(otp, phone_number);
   }
 
   @Query(() => Boolean)

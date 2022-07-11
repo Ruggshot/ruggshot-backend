@@ -102,6 +102,8 @@ type User {
   name: String!
   phone_number: String!
   password: String
+  orgVerified: Boolean!
+  numberVerified: Boolean!
   organizations: [Organization!]!
   events: [Event!]
   activeOrganization: Int
@@ -169,6 +171,8 @@ type Query {
   allOptionsWhereParent(id: Int!): [Option!]!
   verifyUserExists(phone_number: String!): User!
   verifyOTP(otp: Float!, userId: Float!): Boolean!
+  sendOrgOTP(phone_number: String!): Boolean!
+  verifyOrgOTP(otp: Float!, phoneNumber: String!): Boolean!
   isAuthorized: Boolean!
   findFeatureById(id: Int!): Feature!
   allFeatures: [Feature!]!
