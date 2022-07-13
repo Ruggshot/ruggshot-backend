@@ -30,6 +30,16 @@ export class FeatureResolver {
       .categories();
   }
 
+  @ResolveField()
+  async beafs(@Root() feature: Feature, @Context() ctx) {
+    return this.prismaService.feature
+      .findUnique({
+        where: {
+          id: feature.id,
+        },
+      })
+      .beafs();
+  }
   // commenting out for now to make sure parent child relation is good
 
   // @ResolveField()
@@ -54,6 +64,15 @@ export class FeatureResolver {
   @Query(() => [Feature], { name: 'allFeatures' })
   findAll(@Context() ctx) {
     return this.prismaService.feature.findMany();
+  }
+
+  @Query(() => [Feature], { name: 'allFeaturesWhereParent' })
+  findAllWhere(@Args('id', { type: () => Int }) id: number, @Context() ctx) {
+    return this.prismaService.feature.findMany({
+      where: {
+        parent_cat_id: id,
+      },
+    });
   }
 
   @Mutation(() => Feature, { name: 'createFeature' })

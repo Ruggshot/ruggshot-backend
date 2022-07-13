@@ -81,6 +81,9 @@ export class UploadService {
               },
             },
           },
+          include: {
+            images: true,
+          },
         });
         try {
           const image = await this.createImage(
@@ -118,6 +121,14 @@ export class UploadService {
               parseInt(spotInLine),
             );
 
+            const beaf = await this.prismaService.beaf.findUnique({
+              where: {
+                id: insertImage.id,
+              },
+              include: {
+                images: true,
+              },
+            });
             this.findImageById(image.id);
             console.log(`Image was UPDATED: Image ID: ${image.id}`);
             return { image, beaf };
@@ -129,9 +140,18 @@ export class UploadService {
               parseInt(eventId),
             );
 
+            const updatedBeaf = await this.prismaService.beaf.findUnique({
+              where: {
+                id: beaf.id,
+              },
+              include: {
+                images: true,
+              },
+            });
+
             this.findImageById(image.id);
             console.log(`New Image created! Image ID: ${image.id}`);
-            return { beaf, image };
+            return { image, updatedBeaf };
           }
         } catch (error) {
           console.log(error);

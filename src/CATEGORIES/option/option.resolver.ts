@@ -29,6 +29,17 @@ export class OptionResolver {
       .features();
   }
 
+  @ResolveField()
+  async beafs(@Root() option: Option, @Context() ctx) {
+    return this.prismaService.option
+      .findUnique({
+        where: {
+          id: option.id,
+        },
+      })
+      .beafs();
+  }
+
   @Query(() => Option, { name: 'findOptionByID' })
   findOne(@Args('id', { type: () => Int }) id: number, @Context() ctx) {
     return this.prismaService.option.findUnique({
