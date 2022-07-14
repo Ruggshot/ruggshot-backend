@@ -13,6 +13,8 @@ import { UserNumber } from './entities/user-number.entity';
 import { GqlAuthGuard } from './gql-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ApolloError } from 'apollo-server-express';
+import { AdminLoginResponse } from './dto/admin-login-response';
+import { AdminLoginInput } from './dto/admin-login.input';
 
 @Resolver()
 export class AuthResolver {
@@ -28,6 +30,15 @@ export class AuthResolver {
     @Context() context,
   ) {
     return this.authService.login(context.user);
+  }
+
+  @Mutation(() => AdminLoginResponse, { name: 'loginAdmin' })
+  @UseGuards(GqlAuthGuard)
+  async loginAdmin(
+    @Args('adminLoginInput') adminLoginInput: AdminLoginInput,
+    @Context() context,
+  ) {
+    return this.authService.loginAdmin(context.admin);
   }
 
   @Mutation(() => User)

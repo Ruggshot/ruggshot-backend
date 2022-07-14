@@ -14,7 +14,7 @@ import {
   Int,
   CONTEXT,
 } from '@nestjs/graphql';
-import { Category, Prisma } from '@prisma/client';
+import { Category, EventStatus, Prisma } from '@prisma/client';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Organization } from 'src/organization/entities/organization.entity';
@@ -95,7 +95,7 @@ export class EventResolver {
     orderBy: SortOrder,
     @Args('skip', { nullable: true }) skip: number,
     @Args('take', { nullable: true }) take: number,
-    @Args('status', { nullable: true }) status: string,
+    @Args('status', { nullable: true }) status: EventStatus,
     @Args('zipCode', { nullable: true }) zip_code: string,
     @Args('firstName', { nullable: true }) first_name: string,
     @Args('lastName', { nullable: true }) last_name: string,
@@ -222,7 +222,7 @@ export class EventResolver {
   async updateEvent(
     @Context() ctx,
     @Args('eventId') id: number,
-    @Args('eventStatus', { nullable: true }) status?: string,
+    @Args('eventStatus', { nullable: true }) status?: EventStatus,
     @Args('firstName', { nullable: true }) first_name?: string,
     @Args('lastName', { nullable: true }) last_name?: string,
     @Args('zipCode', { nullable: true }) zip_code?: string,

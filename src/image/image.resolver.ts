@@ -41,7 +41,6 @@ import { Event } from 'src/event/entities/event.entity';
 export class ImageResolver {
   constructor(
     @Inject(PrismaService) private prismaService: PrismaService,
-    @Inject(ConfigService) private cfg: ConfigService,
     @Inject(ImageService) private imageService: ImageService,
     private s3: S3Service,
   ) {}

@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { config } from 'process';
+import { config, env } from 'process';
 import * as AWS from 'aws-sdk';
 
 @Injectable()
 export class S3Service {
-  constructor(@Inject(ConfigService) private cfg: ConfigService) {}
+  constructor() {}
 
-  AWS_S3_BUCKET = this.cfg.get('AWS_S3_BUCKET');
+  AWS_S3_BUCKET = env.AWS_S3_BUCKET;
   s3 = new AWS.S3();
 
   // monkey = this.s3.upload();

@@ -13,8 +13,9 @@ import { Organization } from './entities/organization.entity';
 import { CreateOrganizationInput } from './dto/create-organization.input';
 import { UpdateOrganizationInput } from './dto/update-organization.input';
 import { PrismaService } from 'src/prisma.service';
-import { Inject, Res } from '@nestjs/common';
+import { Inject, Res, UseGuards } from '@nestjs/common';
 import { Customer, Gallery, User } from '@prisma/client';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Resolver(() => Organization)
 export class OrganizationResolver {
@@ -96,6 +97,7 @@ export class OrganizationResolver {
   }
 
   @Query(() => [Organization], { name: 'allOrganizations' })
+  @UseGuards(JwtAuthGuard)
   findAll(@Context() ctx) {
     return this.prismaService.organization.findMany();
   }

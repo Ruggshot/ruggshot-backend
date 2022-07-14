@@ -9,6 +9,7 @@ import {
   Resolver,
   Root,
 } from '@nestjs/graphql';
+import { env } from 'process';
 import { PrismaService } from 'src/prisma.service';
 import { CreateOptionInput } from './dto/create-option.input';
 import { Option } from './entities/option.entity';
