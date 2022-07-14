@@ -8,10 +8,11 @@ import {
   Resolver,
   Root,
 } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
+import { Feature, Option, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { Story } from 'src/story/entities/story.entity';
 import { BeafService } from './beaf.service';
+import { BeafUpdateInputDto } from './dto/update-beaf.input';
 import { Beaf } from './entities/beaf.entity';
 
 @Resolver(() => Beaf)
@@ -41,6 +42,16 @@ export class BeafResolver {
   }
 
   @ResolveField()
+  feature(@Root() beaf: Beaf) {
+    return this.prismaService.beaf
+      .findUnique({
+        where: {
+          id: beaf.id,
+        },
+      })
+      .Feature();
+  }
+  @ResolveField()
   async stories(@Root() beaf: Beaf, @Context() ctx): Promise<Story[]> {
     return this.prismaService.beaf
       .findUnique({
@@ -62,6 +73,17 @@ export class BeafResolver {
       .images();
   }
 
+  @ResolveField()
+  async options(@Root() beaf: Beaf, @Context() ctx) {
+    return this.prismaService.beaf
+      .findUnique({
+        where: {
+          id: beaf.id,
+        },
+      })
+      .options();
+  }
+
   @Mutation(() => Beaf)
   async createBeaf(
     @Args('eventId') eventId: number,
@@ -80,6 +102,85 @@ export class BeafResolver {
     this.prismaService.beaf.findMany();
   }
 
+  @Mutation(() => Beaf, { name: 'updateBeaf' })
+  async updateBeaf(
+    @Args('beafId') beafId: number,
+    @Args('input') input: BeafUpdateInputDto,
+    @Context() ctx,
+  ) {
+    // resets beaf options to null
+    await this.prismaService.beaf.update({
+      where: {
+        id: beafId,
+      },
+      data: {
+        options: {
+          set: [],
+        },
+      },
+    });
+
+    const features = await this.prismaService.feature.findUnique({
+      where: {
+        id: input.featureId,
+      },
+      include: {
+        options: true,
+      },
+    });
+
+    const availableOptions = features.options.map(({ id }) => id);
+
+    const optionsArray = [];
+
+    input.options.forEach((element) => {
+      if (availableOptions.includes(element)) {
+        optionsArray.push(element);
+      }
+    });
+
+    const updatedBeaf = this.prismaService.beaf.update({
+      where: {
+        id: beafId,
+      },
+      data: {
+        featureId: input.featureId,
+        options: {
+          connect: optionsArray.map((int) => ({ id: int })),
+        },
+      },
+    });
+
+    if (input.description != null) {
+      await this.prismaService.beaf.update({
+        where: {
+          id: beafId,
+        },
+        data: {
+          description: input.description,
+        },
+      });
+    }
+    return updatedBeaf;
+  }
+
+  @Mutation(() => Beaf, { name: 'updateBeafFeature' })
+  async updateFeature(
+    @Args('beafId') beafId: number,
+    @Args('input') input: BeafUpdateInputDto,
+  ) {
+    // resets beaf options to null
+    await this.prismaService.beaf.update({
+      where: {
+        id: beafId,
+      },
+      data: {
+        options: {
+          set: [],
+        },
+      },
+    });
+  }
   @Query(() => Beaf, { name: 'findBeafById' })
   async findOne(@Args('beafId') beafId: number, @Context() ctx) {
     const beaf = await this.prismaService.beaf.findMany({
@@ -97,6 +198,10 @@ export class BeafResolver {
     return this.prismaService.beaf.findUnique({
       where: {
         id: beafId,
+      },
+      include: {
+        Feature: true,
+        options: true,
       },
     });
   }

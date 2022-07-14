@@ -1,4 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Beaf } from 'src/beaf/entities/beaf.entity';
 import { Category } from 'src/CATEGORIES/category/entities/category.entity';
 import { Option } from 'src/CATEGORIES/option/entities/option.entity';
 
@@ -21,4 +22,7 @@ export class Feature {
 
   @Field(() => [Option], { nullable: true }) // nullable while creating most likely
   options?: [Option];
+
+  @Field(() => [Beaf])
+  beafs?: [Beaf];
 }

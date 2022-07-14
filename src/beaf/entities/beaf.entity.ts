@@ -35,6 +35,9 @@ export class Beaf {
   @Field(() => Feature, { nullable: true })
   feature?: Feature;
 
+  @Field(() => Int, { nullable: true })
+  featureId?: number;
+
   @Field(() => [Option], { nullable: true })
   options?: [Option];
 

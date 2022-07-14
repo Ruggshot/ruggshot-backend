@@ -47,6 +47,7 @@ type Option {
   id: Int!
   option_name: String!
   active: Boolean!
+  beafs: [Beaf!]!
   parent_feat_id: Int!
   features: [Feature!]!
 }
@@ -58,6 +59,7 @@ type Feature {
   parent_cat_id: Int!
   categories: [Category!]!
   options: [Option!]
+  beafs: [Beaf!]!
 }
 
 type Gallery {
@@ -92,6 +94,7 @@ type Beaf {
   event: Event
   eventId: Float
   feature: Feature
+  featureId: Int
   options: [Option!]
   createdAt: Timestamp!
   updatedAt: Timestamp!
@@ -176,6 +179,7 @@ type Query {
   isAuthorized: Boolean!
   findFeatureById(id: Int!): Feature!
   allFeatures: [Feature!]!
+  allFeaturesWhereParent(id: Int!): [Feature!]!
 }
 
 input FUserUniqueInput {
@@ -205,6 +209,8 @@ type Mutation {
   updateUser(userId: Float!, updateUserInput: UpdateUserInput!): User!
   createGallery(organizationId: Float!): Gallery!
   createBeaf(eventId: Float!): Beaf!
+  updateBeaf(beafId: Float!, input: BeafUpdateInputDto!): Beaf!
+  updateBeafFeature(beafId: Float!, input: BeafUpdateInputDto!): Beaf!
   createStory(data: CreateStoryInput!, beafId: Float!): Story!
   singleUpload(file: Upload!, eventId: Int!, beafIndex: Int!, spotInLine: Int!): Boolean!
   createCategory(data: CreateCategoryInput!): Category!
@@ -247,6 +253,12 @@ input UpdateUserInput {
   phone_number: String
   password: String!
   activeOrganization: Int
+}
+
+input BeafUpdateInputDto {
+  featureId: Int
+  options: [Int!]
+  description: String
 }
 
 input CreateStoryInput {
