@@ -20,7 +20,6 @@ import { FeatureModule } from './CATEGORIES/feature/feature.module';
 import { EventResolver } from './event/event.resolver';
 import { S3Service } from './s3/s3.service';
 import { UploadModule } from './upload/upload.module';
-import { AdminModule } from './admin/admin.module';
 import e from 'express';
 import { env } from 'process';
 
@@ -53,7 +52,6 @@ import { env } from 'process';
     AuthModule,
     FeatureModule,
     UploadModule,
-    AdminModule,
   ],
   controllers: [],
   providers: [PrismaService, EventResolver, S3Service],

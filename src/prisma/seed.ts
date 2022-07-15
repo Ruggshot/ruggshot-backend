@@ -79,18 +79,6 @@ const orgData: Prisma.OrganizationCreateInput[] = [
   },
 ];
 
-const hashedPassword = bcrpyt.hash('admin', 10);
-async function createAdmin() {
-  const hashedPassword = await bcrpyt.hash('admin', 10);
-  return prisma.admin.create({
-    data: {
-      name: 'Admin',
-      email: 'admin@ruggshot.io',
-      password: hashedPassword,
-    },
-  });
-}
-
 async function main() {
   // console.log(`Start seeding ...`);
   // for (const u of userData) {

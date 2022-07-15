@@ -17,9 +17,6 @@ import { InjectTwilio, TwilioClient } from 'nestjs-twilio';
 import { ConfigService } from '@nestjs/config';
 import { DateTime } from 'luxon';
 import { ApolloError } from 'apollo-server-express';
-import { use } from 'passport';
-import { throwError } from 'rxjs';
-import { Admin } from 'src/admin/entities/admin.entity';
 import { env } from 'process';
 
 @Injectable()
@@ -57,26 +54,7 @@ export class AuthService {
     }
     return null;
   }
-
-  async validateAdmin(email: string, password: string): Promise<any> {
-    const admin = await this.prismaService.admin.findUnique({
-      where: {
-        email: email,
-      },
-    });
-
-    if (!admin) {
-      throw new ApolloError('Admin not found', '404');
-    }
-
-    const valid = await bcrpyt.compare(password, admin?.password);
-
-    if (admin && valid) {
-      const { password, ...result } = admin; // password is stripped from admin
-      return result;
-    }
-    return null;
-  }
+  y;
   async login(user: User) {
     return {
       access_token: this.jwtService.sign({
@@ -84,16 +62,6 @@ export class AuthService {
         sub: user.id,
       }),
       user,
-    };
-  }
-
-  async loginAdmin(admin: Admin) {
-    return {
-      access_token: this.jwtService.sign({
-        email: admin.email,
-        sub: admin.id,
-      }),
-      admin,
     };
   }
 
