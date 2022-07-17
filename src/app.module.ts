@@ -20,6 +20,7 @@ import { FeatureModule } from './CATEGORIES/feature/feature.module';
 import { EventResolver } from './event/event.resolver';
 import { S3Service } from './s3/s3.service';
 import { UploadModule } from './upload/upload.module';
+import { env } from 'process';
 
 @Module({
   imports: [
@@ -36,13 +37,9 @@ import { UploadModule } from './upload/upload.module';
       cors: true,
       //resolvers: { Upload: GraphQLUpload },
     }),
-    TwilioModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (cfg: ConfigService) => ({
-        accountSid: cfg.get('TWILIO_ACCOUNT_SID'),
-        authToken: cfg.get('TWILIO_AUTH_TOKEN'),
-      }),
-      inject: [ConfigService],
+    TwilioModule.forRoot({
+      accountSid: env.TWILIO_ACCOUNT_SID,
+      authToken: env.TWILIO_AUTH_TOKEN,
     }),
     OrganizationModule,
     CustomerModule,
