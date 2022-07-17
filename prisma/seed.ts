@@ -1,52 +1,17 @@
 import { PrismaClient, Prisma } from '@prisma/client';
+import * as bcrpyt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-const userData: Prisma.FUserCreateInput[] = [
+const customerData: Prisma.CustomerCreateInput[] = [
   {
-    name: 'Alice',
-    email: 'alice@prisma.io',
-    posts: {
-      create: [
-        {
-          title: 'Join the Prisma Slack',
-          content: 'https://slack.prisma.io',
-          published: true,
-        },
-      ],
-    },
+    name: 'Attic Crew Industries',
   },
   {
-    name: 'Nilu',
-    email: 'nilu@prisma.io',
-    posts: {
-      create: [
-        {
-          title: 'Follow Prisma on Twitter',
-          content: 'https://www.twitter.com/prisma',
-          published: true,
-          viewCount: 42,
-        },
-      ],
-    },
+    name: 'Powerful Insulation Inc',
   },
   {
-    name: 'Mahmoud',
-    email: 'mahmoud@prisma.io',
-    posts: {
-      create: [
-        {
-          title: 'Ask a question about Prisma on GitHub',
-          content: 'https://www.github.com/prisma/prisma/discussions',
-          published: true,
-          viewCount: 128,
-        },
-        {
-          title: 'Prisma on YouTube',
-          content: 'https://pris.ly/youtube',
-        },
-      ],
-    },
+    name: 'Rodent Science',
   },
 ];
 
@@ -75,21 +40,61 @@ const orgData: Prisma.OrganizationCreateInput[] = [
       connect: { id: 1 },
     },
   },
+
+  {
+    name: 'Attic Solutions',
+    customer: {
+      connect: { id: 2 },
+    },
+  },
+  {
+    name: 'Attic Insulation',
+    customer: {
+      connect: { id: 2 },
+    },
+  },
+  {
+    name: 'Attic Construction',
+    customer: {
+      connect: { id: 2 },
+    },
+  },
+  {
+    name: 'Rodent Removal',
+    customer: {
+      connect: { id: 3 },
+    },
+  },
+  {
+    name: 'Rodent Begone',
+    customer: {
+      connect: { id: 3 },
+    },
+  },
+  {
+    name: 'Rats Out!',
+    customer: {
+      connect: { id: 3 },
+    },
+  },
 ];
 
 async function main() {
-  console.log(`Start seeding ...`);
-  for (const u of userData) {
-    const user = await prisma.fUser.create({
-      data: u,
+  // console.log(`Start seeding ...`);
+  // for (const u of userData) {
+  //   const user = await prisma.fUser.create({
+  //     data: u,
+  //   });
+  //   console.log(`Created user with id: ${user.id}`);
+  // }
+  // createAdmin();
+
+  for (const c of customerData) {
+    const customer = await prisma.customer.create({
+      data: c,
     });
-    console.log(`Created user with id: ${user.id}`);
+    console.log(`Created customer with id: ${customer.id}`);
   }
-  await prisma.customer.create({
-    data: {
-      name: 'Attic Crew Industries',
-    },
-  });
 
   for (const u of orgData) {
     const org = await prisma.organization.create({
@@ -97,6 +102,22 @@ async function main() {
     });
     console.log(`Created org with name: ${org.name}`);
   }
+
+  return prisma.user.create({
+    data: {
+      name: 'Admin',
+      phone_number: '+972547578388',
+      password: await bcrpyt.hash('admin', 10),
+      activeOrganization: 1,
+      organizations: {
+        connect: [
+          {
+            id: 1,
+          },
+        ],
+      },
+    },
+  });
 
   console.log(`Seeding finished.`);
 }

@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { PrismaService } from './prisma.service';
-import { PostResolver } from './resolvers.post';
-import { FUserResolver } from './resolvers.fuser';
 import { join } from 'path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { OrganizationModule } from './organization/organization.module';
@@ -61,12 +59,6 @@ import { UploadModule } from './upload/upload.module';
     UploadModule,
   ],
   controllers: [],
-  providers: [
-    PrismaService,
-    FUserResolver,
-    PostResolver,
-    EventResolver,
-    S3Service,
-  ],
+  providers: [PrismaService, EventResolver, S3Service],
 })
 export class AppModule {}
