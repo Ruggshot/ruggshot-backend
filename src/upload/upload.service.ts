@@ -4,15 +4,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Image } from '@prisma/client';
 import { DateTime } from 'luxon';
+import { env } from 'process';
 import { PrismaService } from 'src/prisma.service';
 import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class UploadService {
-  constructor(
-    @Inject(PrismaService) private prismaService: PrismaService,
-    @Inject(ConfigService) private cfg: ConfigService,
-  ) {}
+  constructor(@Inject(PrismaService) private prismaService: PrismaService) {}
   async uploadImage(
     user: User,
     file: Express.Multer.File,
@@ -41,12 +39,12 @@ export class UploadService {
 
     const { fieldname, originalname, encoding, mimetype, buffer } = file;
 
-    const s3Client = new S3Client({ region: this.cfg.get('AWS_REGION') });
+    const s3Client = new S3Client({ region: env.AWS_REGION });
 
     const time = DateTime.now().toUTC().toFormat('X');
 
     const uploadParams = {
-      Bucket: this.cfg.get('AWS_S3_BUCKET'),
+      Bucket: env.AWS_S3_BUCKET,
       Key: `${activeOrg.customer.name}/${activeOrg.name}/${eventId}/${time}-${originalname}`,
       Body: buffer,
       ContentType: mimetype,
@@ -65,7 +63,7 @@ export class UploadService {
       await upload.done();
 
       const location = uploadParams.Key.replaceAll(' ', '+');
-      const saveLocation = `${this.cfg.get('S3_DEV_URL')}${location}`;
+      const saveLocation = `${env.S3_DEV_URL}${location}`;
 
       if (activeEvent?.beafs[beafIndex] == null) {
         const beaf = await this.prismaService.beaf.create({

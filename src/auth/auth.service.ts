@@ -19,13 +19,13 @@ import { DateTime } from 'luxon';
 import { ApolloError } from 'apollo-server-express';
 import { use } from 'passport';
 import { throwError } from 'rxjs';
+import { env } from 'process';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(PrismaService) private prismaService: PrismaService,
     @InjectTwilio() private readonly client: TwilioClient,
-    @Inject(ConfigService) private cfg: ConfigService,
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
@@ -80,7 +80,7 @@ export class AuthService {
       try {
         await this.client.messages.create({
           body: message,
-          from: this.cfg.get('TWILIO_PHONE_NUMBER'),
+          from: env.TWILIO_PHONE_NUMBER,
           to: user.phone_number,
         });
         console.log('otp sent');
@@ -220,7 +220,7 @@ export class AuthService {
       try {
         await this.client.messages.create({
           body: message,
-          from: this.cfg.get('TWILIO_PHONE_NUMBER'),
+          from: env.TWILIO_PHONE_NUMBER,
           to: user.phone_number,
         });
         console.log('otp sent');

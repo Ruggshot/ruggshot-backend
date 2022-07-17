@@ -41,7 +41,6 @@ import { Event } from 'src/event/entities/event.entity';
 export class ImageResolver {
   constructor(
     @Inject(PrismaService) private prismaService: PrismaService,
-    @Inject(ConfigService) private cfg: ConfigService,
     @Inject(ImageService) private imageService: ImageService,
     private s3: S3Service,
   ) {}
@@ -111,7 +110,7 @@ export class ImageResolver {
 
   //   const stream = createReadStream();
   //   const uploadParams = {
-  //     Bucket: this.cfg.get('AWS_S3_BUCKET'),
+  //     Bucket: env.AWS_S3_BUCKET,
   //     Key: `orgName/eventNo/${filename}`,
   //     Body: stream,
   //     ContentType: mimetype,
