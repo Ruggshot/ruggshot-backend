@@ -21,6 +21,7 @@ import { EventResolver } from './event/event.resolver';
 import { S3Service } from './s3/s3.service';
 import { UploadModule } from './upload/upload.module';
 import { env } from 'process';
+import { EventService } from './event/event.service';
 
 @Module({
   imports: [
@@ -56,6 +57,6 @@ import { env } from 'process';
     UploadModule,
   ],
   controllers: [],
-  providers: [PrismaService, EventResolver, S3Service],
+  providers: [PrismaService, EventResolver, S3Service, EventService],
 })
 export class AppModule {}

@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Inject, UseGuards } from '@nestjs/common';
+import { Inject, Logger, UseGuards } from '@nestjs/common';
 import {
   Context,
   ResolveField,
@@ -23,6 +23,7 @@ import { User } from 'src/user/entities/user.entity';
 import { CreateEventInput } from './dto/create-event.input';
 import { Event } from './entities/event.entity';
 import { EventService } from './event.service';
+import { ApolloError } from 'apollo-server-express';
 
 enum SortOrder {
   asc = 'asc',
@@ -31,7 +32,10 @@ enum SortOrder {
 
 @Resolver(() => Event)
 export class EventResolver {
-  constructor(@Inject(PrismaService) private prismaService: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private prismaService: PrismaService,
+    private eventService: EventService,
+  ) {}
 
   @ResolveField()
   category(@Root() event: Event): Promise<Category | null> {
@@ -165,55 +169,71 @@ export class EventResolver {
     });
 
     console.log(activeUser.activeOrganization);
-    try {
-      const newEvent = await this.prismaService.event.create({
-        data: {
-          first_name: data.first_name,
-          last_name: data.last_name,
-          zip_code: data.zip_code,
-          city: data.city,
-          phone_number: data.phone_number,
-          status: 'DRAFT',
-          user: {
-            connect: {
-              id: activeUser.id,
-            },
-          },
 
-          organization: {
-            connect: {
-              id: activeUser.activeOrganization,
-            },
-          },
+    const exists = await this.eventService.isUnique(
+      data.first_name.trimEnd(),
+      data.last_name.trimEnd(),
+      data.zip_code,
+      activeOrg.id,
+    );
 
-          category: {
-            connect: {
-              id: data.categoryId,
+    // If event already exists, return error
+    if (!exists) {
+      Logger.error('Name and Zip Code already exist under this organization!');
+      throw new ApolloError(
+        'Name and Zip Code already exist under this organization!',
+      );
+    } else {
+      try {
+        const newEvent = await this.prismaService.event.create({
+          data: {
+            first_name: data.first_name.trimEnd(),
+            last_name: data.last_name.trimEnd(),
+            zip_code: data.zip_code,
+            city: data.city,
+            phone_number: data.phone_number,
+            status: 'DRAFT',
+            user: {
+              connect: {
+                id: activeUser.id,
+              },
+            },
+
+            organization: {
+              connect: {
+                id: activeUser.activeOrganization,
+              },
+            },
+
+            category: {
+              connect: {
+                id: data.categoryId,
+              },
             },
           },
-        },
-      });
-      // try {
-      //   await this.prismaService.beaf.create({
-      //     data: {
-      //       event: {
-      //         connect: {
-      //           id: newEvent.id,
-      //         },
-      //       },
-      //       gallery: {
-      //         connect: {
-      //           id: activeOrg.galleries[0].id,
-      //         },
-      //       },
-      //     },
-      //   });
-      // } catch (error) {
-      //   console.log(error);
-      // }
-      return newEvent;
-    } catch (error) {
-      console.log(error);
+        });
+        // try {
+        //   await this.prismaService.beaf.create({
+        //     data: {
+        //       event: {
+        //         connect: {
+        //           id: newEvent.id,
+        //         },
+        //       },
+        //       gallery: {
+        //         connect: {
+        //           id: activeOrg.galleries[0].id,
+        //         },
+        //       },
+        //     },
+        //   });
+        // } catch (error) {
+        //   console.log(error);
+        // }
+        return newEvent;
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 
