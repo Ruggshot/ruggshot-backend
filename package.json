@@ -1,14 +1,11 @@
 {
-  "name": "rest-nestjs",
+  "name": "ruggshot-backend",
   "version": "0.0.1",
-  "private": true,
   "description": "",
   "license": "UNLICENSED",
-  "author": "",
+  "author": "Ben Kaye",
 
-  "engines": {
-    "node": "18.4.0"
-  },
+ 
   "scripts": {
     "postinstall": "npx prisma generate && npm run build",
     "prebuild": "rimraf dist",
