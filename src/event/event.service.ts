@@ -14,8 +14,14 @@ export class EventService {
   ): Promise<Boolean> {
     const exists = await this.prismaService.event.findMany({
       where: {
-        first_name: first_name,
-        last_name: last_name,
+        first_name: {
+          equals: first_name,
+          mode: 'insensitive',
+        },
+        last_name: {
+          equals: last_name,
+          mode: 'insensitive',
+        },
         organizationId: organizationId,
         zip_code: zip_code,
       },
