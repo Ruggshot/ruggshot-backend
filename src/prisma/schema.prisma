@@ -91,9 +91,8 @@ model Event {
   organizationId Int? //organizationId: organization(orgUser).id
   category       Category?     @relation(fields: [categoryId], references: [id])
   categoryId     Int?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
 }
 

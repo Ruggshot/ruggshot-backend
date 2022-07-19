@@ -80,8 +80,10 @@ export class UploadService {
               },
             },
           },
+
           include: {
             images: true,
+            event: true,
           },
         });
         try {
@@ -214,6 +216,14 @@ export class UploadService {
     location: string,
     eventId: number,
   ): Promise<Image> {
+    await this.prismaService.event.update({
+      where: {
+        id: eventId,
+      },
+      data: {
+        updatedAt: new Date(),
+      },
+    });
     return this.prismaService.image.create({
       data: {
         beafs: {
@@ -243,6 +253,11 @@ export class UploadService {
       data: {
         location: location,
         spotInLine: spotInLine,
+        event: {
+          update: {
+            updatedAt: new Date(),
+          },
+        },
       },
     });
   }

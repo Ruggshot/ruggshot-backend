@@ -128,7 +128,7 @@ export class EventResolver {
     });
     const events = await this.prismaService.event.findMany({
       orderBy: {
-        first_name: SortOrder.asc,
+        updatedAt: 'desc',
       },
       where: {
         id: eventId || undefined,
@@ -275,6 +275,45 @@ export class EventResolver {
         zip_code: zip || undefined,
         phone_number: phone_number || undefined,
         categoryId: category || undefined,
+      },
+    });
+  }
+
+  @Mutation(() => Event, { name: 'updateEventAndBeafs' })
+  @UseGuards(JwtAuthGuard)
+  async updateEventAndBeafs(
+    @Context() ctx,
+    @Args('eventId') id: number,
+    @Args('eventStatus', { nullable: true }) status?: EventStatus,
+  ) {
+    // Sets `isComplete` to true for all Beafs associated with this event
+    var setStatus: boolean;
+    if (status == 'DRAFT') {
+      setStatus = false;
+    } else {
+      setStatus = true;
+    }
+
+    const activeEvent = await this.prismaService.event.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    await this.prismaService.beaf.updateMany({
+      where: {
+        eventId: activeEvent.id,
+      },
+      data: {
+        isCompleted: setStatus,
+      },
+    });
+    return this.prismaService.event.update({
+      where: {
+        id: activeEvent.id,
+      },
+      data: {
+        status: status || undefined,
       },
     });
   }

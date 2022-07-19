@@ -166,6 +166,7 @@ type Query {
 type Mutation {
   createEvent(data: CreateEventInput!): Event!
   updateEvent(eventId: Float!, eventStatus: String, firstName: String, lastName: String, zipCode: String, phoneNumber: String, categoryId: Float): Event!
+  updateEventAndBeafs(eventId: Float!, eventStatus: String): Event!
   createOrganization(data: CreateOrganizationInput!, customerId: Float!, users: Float!): Organization!
   createCustomer(data: CreateCustomerInput!): Customer!
   firstTimePassword(userId: Float!, updateUserInput: UpdateUserInput!): User!
