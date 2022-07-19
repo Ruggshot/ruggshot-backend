@@ -269,12 +269,12 @@ export class EventResolver {
         id: activeEvent.id,
       },
       data: {
-        status: status,
-        first_name: first_name,
-        last_name: last_name,
+        status: status || undefined,
+        first_name: first_name || undefined,
+        last_name: last_name || undefined,
         zip_code: zip || undefined,
-        phone_number: phone_number,
-        categoryId: category,
+        phone_number: phone_number || undefined,
+        categoryId: category || undefined,
       },
     });
   }
