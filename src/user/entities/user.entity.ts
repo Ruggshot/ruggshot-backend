@@ -23,6 +23,9 @@ export class User {
   @Field(() => Boolean)
   numberVerified: Boolean;
 
+  @Field(() => String, { nullable: true })
+  avatar: string;
+
   @Field(() => [Organization])
   organizations: [Organization];
 

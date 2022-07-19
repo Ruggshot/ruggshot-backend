@@ -11,4 +11,7 @@ export class UpdateUserInput extends PartialType(CreateUserInput) {
 
   @Field(() => Int, { nullable: true })
   activeOrganization?: number;
+
+  @Field(() => String, { nullable: true })
+  avatar?: string;
 }

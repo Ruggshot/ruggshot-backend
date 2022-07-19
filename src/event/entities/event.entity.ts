@@ -1,4 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { EventStatus } from '@prisma/client';
 import 'reflect-metadata';
 import { Beaf } from 'src/beaf/entities/beaf.entity';
 import { Category } from 'src/CATEGORIES/category/entities/category.entity';
@@ -27,7 +28,7 @@ export class Event {
   phone_number: string;
 
   @Field(() => String)
-  status: string;
+  status: EventStatus;
 
   @Field(() => Date)
   createdAt?: Date;

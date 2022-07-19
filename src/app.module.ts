@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { PrismaService } from './prisma.service';
-import { PostResolver } from './resolvers.post';
-import { FUserResolver } from './resolvers.fuser';
 import { join } from 'path';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { OrganizationModule } from './organization/organization.module';
@@ -22,6 +20,8 @@ import { FeatureModule } from './CATEGORIES/feature/feature.module';
 import { EventResolver } from './event/event.resolver';
 import { S3Service } from './s3/s3.service';
 import { UploadModule } from './upload/upload.module';
+import { env } from 'process';
+import { EventService } from './event/event.service';
 
 @Module({
   imports: [
@@ -38,13 +38,9 @@ import { UploadModule } from './upload/upload.module';
       cors: true,
       //resolvers: { Upload: GraphQLUpload },
     }),
-    TwilioModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (cfg: ConfigService) => ({
-        accountSid: cfg.get('TWILIO_ACCOUNT_SID'),
-        authToken: cfg.get('TWILIO_AUTH_TOKEN'),
-      }),
-      inject: [ConfigService],
+    TwilioModule.forRoot({
+      accountSid: env.TWILIO_ACCOUNT_SID,
+      authToken: env.TWILIO_AUTH_TOKEN,
     }),
     OrganizationModule,
     CustomerModule,
@@ -61,12 +57,6 @@ import { UploadModule } from './upload/upload.module';
     UploadModule,
   ],
   controllers: [],
-  providers: [
-    PrismaService,
-    FUserResolver,
-    PostResolver,
-    EventResolver,
-    S3Service,
-  ],
+  providers: [PrismaService, EventResolver, S3Service, EventService],
 })
 export class AppModule {}

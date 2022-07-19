@@ -83,6 +83,12 @@ export class UserResolver {
     return this.userService.findOne(user.phone_number);
   }
 
+  @Query(() => User, { name: 'findUserByToken' })
+  @UseGuards(JwtAuthGuard)
+  findUserByToken(@CurrentUser() user: User) {
+    return this.userService.findOne(user.phone_number);
+  }
+
   // Definitely don't need this
   // @Query(() => User, { name: 'findUserOrganizations' })
   // findUserOrg(@Args('id', { type: () => Int }) id: number, @Context() ctx) {
@@ -97,13 +103,22 @@ export class UserResolver {
   // }
 
   @Mutation(() => User)
-  updateUser(
+  //@UseGuards(JwtAuthGuard)
+  firstTimePassword(
     @Args('userId') userId: number,
     @Args('updateUserInput') data: UpdateUserInput,
   ) {
-    return this.userService.update(userId, data);
+    return this.userService.firstTimePassword(userId, data);
   }
 
+  @Mutation(() => User)
+  @UseGuards(JwtAuthGuard)
+  changePassword(
+    @CurrentUser() user: User,
+    @Args('updateUserInput') data: UpdateUserInput,
+  ) {
+    return this.userService.changePassword(user.id, data);
+  }
   // @Mutation(() => User)
   // removeUser(@Args('id', { type: () => Int }) id: number) {
   //   return this.userService.remove(id);

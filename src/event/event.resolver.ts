@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Inject, UseGuards } from '@nestjs/common';
+import { Inject, Logger, UseGuards } from '@nestjs/common';
 import {
   Context,
   ResolveField,
@@ -14,7 +14,7 @@ import {
   Int,
   CONTEXT,
 } from '@nestjs/graphql';
-import { Category, Prisma } from '@prisma/client';
+import { Category, EventStatus, Prisma } from '@prisma/client';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Organization } from 'src/organization/entities/organization.entity';
@@ -23,6 +23,7 @@ import { User } from 'src/user/entities/user.entity';
 import { CreateEventInput } from './dto/create-event.input';
 import { Event } from './entities/event.entity';
 import { EventService } from './event.service';
+import { ApolloError } from 'apollo-server-express';
 
 enum SortOrder {
   asc = 'asc',
@@ -31,7 +32,10 @@ enum SortOrder {
 
 @Resolver(() => Event)
 export class EventResolver {
-  constructor(@Inject(PrismaService) private prismaService: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private prismaService: PrismaService,
+    private eventService: EventService,
+  ) {}
 
   @ResolveField()
   category(@Root() event: Event): Promise<Category | null> {
@@ -95,7 +99,9 @@ export class EventResolver {
     orderBy: SortOrder,
     @Args('skip', { nullable: true }) skip: number,
     @Args('take', { nullable: true }) take: number,
-    @Args('status', { nullable: true }) status: string,
+    @Args('eventId', { nullable: true }) eventId: number,
+    @Args('userId', { nullable: true }) userId: number,
+    @Args('status', { nullable: true }) status: EventStatus,
     @Args('zipCode', { nullable: true }) zip_code: string,
     @Args('firstName', { nullable: true }) first_name: string,
     @Args('lastName', { nullable: true }) last_name: string,
@@ -103,6 +109,10 @@ export class EventResolver {
     @CurrentUser() user: User,
     @Context() ctx,
   ) {
+    console.log('userId', userId);
+    console.log('eventId', eventId);
+    console.log('status', status);
+    console.log('category', category);
     if (!isNaN(Number(zip_code))) {
       var intZip = Number(zip_code);
     } else {
@@ -118,14 +128,16 @@ export class EventResolver {
     });
     const events = await this.prismaService.event.findMany({
       orderBy: {
-        first_name: SortOrder.asc,
+        updatedAt: 'desc',
       },
       where: {
+        id: eventId || undefined,
+        userId: userId || undefined,
         status: status,
         zip_code: intZip || undefined,
         first_name: first_name || undefined,
         last_name: last_name || undefined,
-        id: category || undefined,
+        categoryId: category || undefined,
         organizationId: activeUser.activeOrganization,
       },
     });
@@ -165,55 +177,71 @@ export class EventResolver {
     });
 
     console.log(activeUser.activeOrganization);
-    try {
-      const newEvent = await this.prismaService.event.create({
-        data: {
-          first_name: data.first_name,
-          last_name: data.last_name,
-          zip_code: data.zip_code,
-          city: data.city,
-          phone_number: data.phone_number,
-          status: 'DRAFT',
-          user: {
-            connect: {
-              id: activeUser.id,
-            },
-          },
 
-          organization: {
-            connect: {
-              id: activeUser.activeOrganization,
-            },
-          },
+    const exists = await this.eventService.isUnique(
+      data.first_name.trimEnd(),
+      data.last_name.trimEnd(),
+      data.zip_code,
+      activeOrg.id,
+    );
 
-          category: {
-            connect: {
-              id: data.categoryId,
+    // If event already exists, return error
+    if (!exists) {
+      Logger.error('Name and Zip Code already exist under this organization!');
+      throw new ApolloError(
+        'Name and Zip Code already exist under this organization!',
+      );
+    } else {
+      try {
+        const newEvent = await this.prismaService.event.create({
+          data: {
+            first_name: data.first_name.trimEnd(),
+            last_name: data.last_name.trimEnd(),
+            zip_code: data.zip_code,
+            city: data.city,
+            phone_number: data.phone_number,
+            status: 'DRAFT',
+            user: {
+              connect: {
+                id: activeUser.id,
+              },
+            },
+
+            organization: {
+              connect: {
+                id: activeUser.activeOrganization,
+              },
+            },
+
+            category: {
+              connect: {
+                id: data.categoryId,
+              },
             },
           },
-        },
-      });
-      // try {
-      //   await this.prismaService.beaf.create({
-      //     data: {
-      //       event: {
-      //         connect: {
-      //           id: newEvent.id,
-      //         },
-      //       },
-      //       gallery: {
-      //         connect: {
-      //           id: activeOrg.galleries[0].id,
-      //         },
-      //       },
-      //     },
-      //   });
-      // } catch (error) {
-      //   console.log(error);
-      // }
-      return newEvent;
-    } catch (error) {
-      console.log(error);
+        });
+        // try {
+        //   await this.prismaService.beaf.create({
+        //     data: {
+        //       event: {
+        //         connect: {
+        //           id: newEvent.id,
+        //         },
+        //       },
+        //       gallery: {
+        //         connect: {
+        //           id: activeOrg.galleries[0].id,
+        //         },
+        //       },
+        //     },
+        //   });
+        // } catch (error) {
+        //   console.log(error);
+        // }
+        return newEvent;
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 
@@ -222,7 +250,7 @@ export class EventResolver {
   async updateEvent(
     @Context() ctx,
     @Args('eventId') id: number,
-    @Args('eventStatus', { nullable: true }) status?: string,
+    @Args('eventStatus', { nullable: true }) status?: EventStatus,
     @Args('firstName', { nullable: true }) first_name?: string,
     @Args('lastName', { nullable: true }) last_name?: string,
     @Args('zipCode', { nullable: true }) zip_code?: string,
@@ -241,12 +269,51 @@ export class EventResolver {
         id: activeEvent.id,
       },
       data: {
-        status: status,
-        first_name: first_name,
-        last_name: last_name,
+        status: status || undefined,
+        first_name: first_name || undefined,
+        last_name: last_name || undefined,
         zip_code: zip || undefined,
-        phone_number: phone_number,
-        categoryId: category,
+        phone_number: phone_number || undefined,
+        categoryId: category || undefined,
+      },
+    });
+  }
+
+  @Mutation(() => Event, { name: 'updateEventAndBeafs' })
+  @UseGuards(JwtAuthGuard)
+  async updateEventAndBeafs(
+    @Context() ctx,
+    @Args('eventId') id: number,
+    @Args('eventStatus', { nullable: true }) status?: EventStatus,
+  ) {
+    // Sets `isComplete` to true for all Beafs associated with this event
+    var setStatus: boolean;
+    if (status == 'DRAFT') {
+      setStatus = false;
+    } else {
+      setStatus = true;
+    }
+
+    const activeEvent = await this.prismaService.event.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    await this.prismaService.beaf.updateMany({
+      where: {
+        eventId: activeEvent.id,
+      },
+      data: {
+        isCompleted: setStatus,
+      },
+    });
+    return this.prismaService.event.update({
+      where: {
+        id: activeEvent.id,
+      },
+      data: {
+        status: status || undefined,
       },
     });
   }

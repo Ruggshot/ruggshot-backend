@@ -2,29 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type FUser {
-  id: Int!
-  email: String!
-  name: String
-  posts: [Post!]
-}
-
-type Post {
-  id: Int!
-  createdAt: Timestamp!
-  updatedAt: Timestamp!
-  title: String!
-  content: String
-  published: Boolean
-  viewCount: Int!
-  author: FUser
-}
-
-"""
-`Date` type as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
-"""
-scalar Timestamp
-
 type Customer {
   id: Int!
   name: String!
@@ -42,6 +19,11 @@ type Category {
   createdAt: Timestamp!
   updatedAt: Timestamp!
 }
+
+"""
+`Date` type as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
+"""
+scalar Timestamp
 
 type Option {
   id: Int!
@@ -107,6 +89,7 @@ type User {
   password: String
   orgVerified: Boolean!
   numberVerified: Boolean!
+  avatar: String
   organizations: [Organization!]!
   events: [Event!]
   activeOrganization: Int
@@ -148,18 +131,16 @@ type LoginResponse {
 }
 
 type Query {
-  allFUsers: [FUser!]
-  draftsByFUser(fuserUniqueInput: FUserUniqueInput!): [Post!]
-  postById(id: Float!): Post
-  feed(searchString: String, skip: Float, take: Float, orderBy: PostOrderByUpdatedAtInput): [Post!]!
-  allEvents(orderBy: String, skip: Float, take: Float, status: String, zipCode: String, firstName: String, lastName: String, categoryId: Float): [Event!]!
+  allEvents(orderBy: String, skip: Float, take: Float, eventId: Float, userId: Float, status: String, zipCode: String, firstName: String, lastName: String, categoryId: Float): [Event!]!
   findEventById(eventId: Float!): Event!
   allOrganizations: [Organization!]!
   organization(id: Int!): Organization!
+  findUsersInOrg: Organization!
   allCustomers: [Customer!]!
   allUsers: [User!]!
   findUserById: User!
   findUserByNumber: User!
+  findUserByToken: User!
   allGalleries: [Gallery!]!
   allBeafs: [Beaf!]!
   findBeafById(beafId: Float!): Beaf!
@@ -182,31 +163,14 @@ type Query {
   allFeaturesWhereParent(id: Int!): [Feature!]!
 }
 
-input FUserUniqueInput {
-  id: Float
-  email: String
-}
-
-input PostOrderByUpdatedAtInput {
-  updatedAt: SortOrder!
-}
-
-enum SortOrder {
-  asc
-  desc
-}
-
 type Mutation {
-  signupFUser(data: FUserCreateInput!): FUser!
-  createDraft(data: PostCreateInput!, authorEmail: String!): Post!
-  incrementPostViewCount(id: Float!): Post!
-  togglePublishPost(id: Float!): Post
-  deletePost(id: Float!): Post
   createEvent(data: CreateEventInput!): Event!
   updateEvent(eventId: Float!, eventStatus: String, firstName: String, lastName: String, zipCode: String, phoneNumber: String, categoryId: Float): Event!
+  updateEventAndBeafs(eventId: Float!, eventStatus: String): Event!
   createOrganization(data: CreateOrganizationInput!, customerId: Float!, users: Float!): Organization!
   createCustomer(data: CreateCustomerInput!): Customer!
-  updateUser(userId: Float!, updateUserInput: UpdateUserInput!): User!
+  firstTimePassword(userId: Float!, updateUserInput: UpdateUserInput!): User!
+  changePassword(updateUserInput: UpdateUserInput!): User!
   createGallery(organizationId: Float!): Gallery!
   createBeaf(eventId: Float!): Beaf!
   updateBeaf(beafId: Float!, input: BeafUpdateInputDto!): Beaf!
@@ -218,17 +182,6 @@ type Mutation {
   loginUser(loginUserInput: LoginUserInput!): LoginResponse!
   signup(createUserInput: CreateUserInput!, organizationId: Float!, anotherOrgId: Float!): User!
   createFeature(data: CreateFeatureInput!): Feature!
-}
-
-input FUserCreateInput {
-  email: String!
-  name: String
-  posts: [PostCreateInput!]
-}
-
-input PostCreateInput {
-  title: String!
-  content: String
 }
 
 input CreateEventInput {
@@ -253,6 +206,7 @@ input UpdateUserInput {
   phone_number: String
   password: String!
   activeOrganization: Int
+  avatar: String
 }
 
 input BeafUpdateInputDto {
