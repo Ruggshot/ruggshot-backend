@@ -89,6 +89,7 @@ type User {
   password: String
   orgVerified: Boolean!
   numberVerified: Boolean!
+  avatar: String
   organizations: [Organization!]!
   events: [Event!]
   activeOrganization: Int
@@ -138,6 +139,7 @@ type Query {
   allUsers: [User!]!
   findUserById: User!
   findUserByNumber: User!
+  findUserByToken: User!
   allGalleries: [Gallery!]!
   allBeafs: [Beaf!]!
   findBeafById(beafId: Float!): Beaf!
@@ -165,7 +167,8 @@ type Mutation {
   updateEvent(eventId: Float!, eventStatus: String, firstName: String, lastName: String, zipCode: String, phoneNumber: String, categoryId: Float): Event!
   createOrganization(data: CreateOrganizationInput!, customerId: Float!, users: Float!): Organization!
   createCustomer(data: CreateCustomerInput!): Customer!
-  updateUser(userId: Float!, updateUserInput: UpdateUserInput!): User!
+  firstTimePassword(userId: Float!, updateUserInput: UpdateUserInput!): User!
+  changePassword(updateUserInput: UpdateUserInput!): User!
   createGallery(organizationId: Float!): Gallery!
   createBeaf(eventId: Float!): Beaf!
   updateBeaf(beafId: Float!, input: BeafUpdateInputDto!): Beaf!
@@ -201,6 +204,7 @@ input UpdateUserInput {
   phone_number: String
   password: String!
   activeOrganization: Int
+  avatar: String
 }
 
 input BeafUpdateInputDto {
