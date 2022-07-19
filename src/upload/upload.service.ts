@@ -11,6 +11,7 @@ import { User } from 'src/user/entities/user.entity';
 @Injectable()
 export class UploadService {
   constructor(@Inject(PrismaService) private prismaService: PrismaService) {}
+
   async uploadImage(
     user: User,
     file: Express.Multer.File,
@@ -160,6 +161,51 @@ export class UploadService {
       return false;
     }
     return true;
+  }
+
+  async uploadAvatar(user: User, file: Express.Multer.File) {
+    const { fieldname, originalname, encoding, mimetype, buffer } = file;
+
+    const s3Client = new S3Client({ region: env.AWS_REGION });
+
+    const time = DateTime.now().toUTC().toFormat('X');
+
+    const uploadParams = {
+      Bucket: env.AWS_S3_BUCKET,
+      Key: `avatars/${user.id}/${time}-${originalname}`,
+      Body: buffer,
+      ContentType: mimetype,
+    };
+
+    const upload = new Upload({
+      client: s3Client,
+      params: uploadParams,
+    });
+
+    try {
+      upload.on('httpUploadProgress', (progress) => {
+        console.log(progress);
+      });
+
+      await upload.done();
+
+      const location = uploadParams.Key.replaceAll(' ', '+');
+      const saveLocation = `${env.S3_DEV_URL}${location}`;
+
+      const image = await this.prismaService.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          avatar: saveLocation,
+        },
+      });
+
+      return image;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   }
 
   async createImage(

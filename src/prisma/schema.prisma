@@ -28,6 +28,7 @@ model User {
   createdAt          DateTime       @default(now())
   otp                Int?
   otp_exp_date       DateTime?
+  avatar             String?
 }
 
 model Gallery {

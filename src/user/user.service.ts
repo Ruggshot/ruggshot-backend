@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma.service';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import * as bcrpyt from 'bcrypt';
+import { ApolloError } from 'apollo-server-express';
 
 @Injectable()
 export class UserService {
@@ -46,7 +47,8 @@ export class UserService {
           },
         },
       });
-      return newUser;
+      const { password, ...result } = newUser;
+      return result;
     } catch (error) {
       if (error.code === 'P2002') {
         Logger.log('User already exists!');
@@ -67,24 +69,48 @@ export class UserService {
     });
   }
 
-  async update(userId: number, data: UpdateUserInput) {
+  async firstTimePassword(userId: number, data: UpdateUserInput) {
     var hashedPassword;
+
+    const activeUser = await this.prismaService.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
     if (data.password) {
       hashedPassword = await bcrpyt.hash(data.password, 10);
     }
+
+    if (activeUser.numberVerified) {
+      return this.prismaService.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          name: data.name,
+          activeOrganization: data.activeOrganization,
+          phone_number: data.phone_number,
+          password: hashedPassword,
+        },
+      });
+    } else {
+      throw new ApolloError(
+        'User has not yet registered. Please Contact your team leader.',
+      );
+    }
+  }
+
+  async changePassword(userId: number, data: UpdateUserInput) {
     return this.prismaService.user.update({
       where: {
         id: userId,
       },
       data: {
-        name: data.name,
-        activeOrganization: data.activeOrganization,
-        phone_number: data.phone_number,
-        password: hashedPassword,
+        password: data.password,
       },
     });
   }
-
   remove(id: number) {
     return `This action removes a #${id} user`;
   }

@@ -46,6 +46,15 @@ export class UploadController {
     );
   }
 
+  @Post('avatar-upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadAvatar(
+    @GetUser() user: User,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.uploadService.uploadAvatar(user, file);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('user')
   findAll(@GetUser() user: User, @Request() req) {
