@@ -131,10 +131,11 @@ type LoginResponse {
 }
 
 type Query {
-  allEvents(orderBy: String, skip: Float, take: Float, status: String, zipCode: String, firstName: String, lastName: String, categoryId: Float): [Event!]!
+  allEvents(orderBy: String, skip: Float, take: Float, eventId: Float, userId: Float, status: String, zipCode: String, firstName: String, lastName: String, categoryId: Float): [Event!]!
   findEventById(eventId: Float!): Event!
   allOrganizations: [Organization!]!
   organization(id: Int!): Organization!
+  findUsersInOrg: Organization!
   allCustomers: [Customer!]!
   allUsers: [User!]!
   findUserById: User!

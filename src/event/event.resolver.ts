@@ -99,6 +99,8 @@ export class EventResolver {
     orderBy: SortOrder,
     @Args('skip', { nullable: true }) skip: number,
     @Args('take', { nullable: true }) take: number,
+    @Args('eventId', { nullable: true }) eventId: number,
+    @Args('userId', { nullable: true }) userId: number,
     @Args('status', { nullable: true }) status: EventStatus,
     @Args('zipCode', { nullable: true }) zip_code: string,
     @Args('firstName', { nullable: true }) first_name: string,
@@ -107,6 +109,10 @@ export class EventResolver {
     @CurrentUser() user: User,
     @Context() ctx,
   ) {
+    console.log('userId', userId);
+    console.log('eventId', eventId);
+    console.log('status', status);
+    console.log('category', category);
     if (!isNaN(Number(zip_code))) {
       var intZip = Number(zip_code);
     } else {
@@ -125,11 +131,13 @@ export class EventResolver {
         first_name: SortOrder.asc,
       },
       where: {
+        id: eventId || undefined,
+        userId: userId || undefined,
         status: status,
         zip_code: intZip || undefined,
         first_name: first_name || undefined,
         last_name: last_name || undefined,
-        id: category || undefined,
+        categoryId: category || undefined,
         organizationId: activeUser.activeOrganization,
       },
     });

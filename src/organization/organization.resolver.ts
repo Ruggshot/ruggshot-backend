@@ -13,8 +13,10 @@ import { Organization } from './entities/organization.entity';
 import { CreateOrganizationInput } from './dto/create-organization.input';
 import { UpdateOrganizationInput } from './dto/update-organization.input';
 import { PrismaService } from 'src/prisma.service';
-import { Inject, Res } from '@nestjs/common';
+import { Inject, Res, UseGuards } from '@nestjs/common';
 import { Customer, Gallery, User } from '@prisma/client';
+import { CurrentUser } from 'src/auth/current-user.decorator';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Resolver(() => Organization)
 export class OrganizationResolver {
@@ -105,6 +107,22 @@ export class OrganizationResolver {
     return this.prismaService.organization.findUnique({
       where: { id },
     });
+  }
+
+  @Query(() => Organization, { name: 'findUsersInOrg' })
+  @UseGuards(JwtAuthGuard)
+  async findUsersInOrg(@CurrentUser() user: User) {
+    const activeUser = await this.prismaService.user.findUnique({
+      where: { id: user.id },
+    });
+
+    console.log(activeUser);
+    const org = this.prismaService.organization.findUnique({
+      where: {
+        id: activeUser.activeOrganization,
+      },
+    });
+    return org;
   }
 
   // @Mutation(() => Organization)

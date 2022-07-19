@@ -1,4 +1,4 @@
-import { ConsoleLogger, Inject } from '@nestjs/common';
+import { ConsoleLogger, Inject, UseGuards } from '@nestjs/common';
 import {
   Args,
   Context,
@@ -14,6 +14,10 @@ import { Feature } from 'src/CATEGORIES/feature/entities/feature.entity';
 import { CategoryService } from './category.service';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { Category } from './entities/category.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CurrentUser } from 'src/auth/current-user.decorator';
+import { userInfo } from 'os';
+import { User } from '@prisma/client';
 
 @Resolver(() => Category)
 export class CategoryResolver {
@@ -70,12 +74,23 @@ export class CategoryResolver {
   }
 
   @Query(() => [Category], { name: 'allAssignedCategories' })
-  async findAssignedCategories(@Context() ctx) {
+  @UseGuards(JwtAuthGuard)
+  async findAssignedCategories(@CurrentUser() user: User, @Context() ctx) {
+    const activeUser = await this.prismaService.user.findUnique({
+      where: {
+        id: user.id,
+      },
+    });
+
     const event = await this.prismaService.event.findMany({
+      where: {
+        organizationId: activeUser.activeOrganization,
+      },
       include: {
         category: true,
       },
     });
+
     const uniqueCategories = [];
 
     event.forEach((element) => {
